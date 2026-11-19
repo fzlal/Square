@@ -10,7 +10,7 @@
 - Current release: 2.4.5 (versionCode 46)
 
 I am the upstream author and would like Square included in F-Droid.
-Square is an Android music client for Spotify Premium and YouTube Music with
+Square is an Android music client for Spotify and YouTube Music with
 Liquid Glass UI, synced lyrics, Spotify Connect, local files, audio effects
 and a sleep timer. It does not require the official Spotify application for
 native playback. Android 8.0 or later is required.

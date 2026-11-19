@@ -549,15 +549,13 @@ pub fn start(
     // back to a session that was never connected and a player that only ever
     // reads from disk. See [`build_offline_bundle`].
     //
-    // A refused account is not covered: that is Spotify saying no, not the
-    // network being absent, and starting anyway would hide it behind an app
-    // that plays a few downloaded songs and explains nothing.
+    // A free account is not refused any more: the session comes up and the
+    // app carries on with it, whatever Spotify will let it play.
     let built = match build_bundle(&handle, &recipe, &mixer, &events_tx) {
         Ok(bundle) => {
             OFFLINE.store(false, Ordering::SeqCst);
             Ok(bundle)
         }
-        Err(e) if e == PREMIUM_REQUIRED => Err(e),
         Err(e) if crate::downloads::any() => {
             log::warn!("{e}; starting offline with what is on the phone");
             OFFLINE.store(true, Ordering::SeqCst);
@@ -773,18 +771,12 @@ fn build_bundle(
                 cache.save_credentials(&credentials);
             }
 
-            // Checked here rather than left to the library. The vendored
-            // librespot-core used to call exit(1) on a non-premium account,
-            // which took the app's process down and left Android restarting the
-            // service in a loop; it now only logs, so the refusal has to be
-            // made an error the caller can show.
-            if let Some(account_type) = session.get_user_attribute("type") {
-                if account_type != "premium" {
-                    session.shutdown();
-                    return Err(PREMIUM_REQUIRED.to_string());
-                }
-            }
-
+            // Every account type is let through, free included. Upstream
+            // librespot called exit(1) on a non-premium account; the vendored
+            // copy only logs, and the app used to turn that into an error and
+            // sign the user out. A free account can now stay signed in: the
+            // catalogue comes from the Web API and playback is whatever
+            // Spotify grants it.
             return Ok::<_, String>((session, player, spirc, spirc_task));
         }
 
@@ -1316,7 +1308,6 @@ pub fn reconnect() -> EngineResult<()> {
                 log::info!("reconnected");
                 Ok(bundle)
             }
-            Err(e) if e == PREMIUM_REQUIRED => Err(e),
             Err(e) if crate::downloads::any() => {
                 log::warn!("{e}; staying offline with what is on the phone");
                 OFFLINE.store(true, Ordering::SeqCst);
@@ -1437,7 +1428,7 @@ fn reconnect_from_offline() -> EngineResult<()> {
         Ok(bundle) => bundle,
         Err(e) => {
             log::warn!("{e}; staying offline, the player left playing");
-            return if e == PREMIUM_REQUIRED { Err(e) } else { Ok(()) };
+            return Ok(());
         }
     };
 
@@ -1960,11 +1951,6 @@ fn sweep_stale_downloads(dir: &str) {
         log::info!("swept {removed} unfinished downloads");
     }
 }
-
-/// What `start` returns for an account Spotify does not stream to this client.
-///
-/// Matched by the Kotlin side, so it stays a stable string.
-pub const PREMIUM_REQUIRED: &str = "premium account required";
 
 /// How far into a track its successor is fetched, in milliseconds.
 const PRELOAD_AFTER_MS: u32 = 5_000;

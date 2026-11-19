@@ -5,7 +5,7 @@
 <h1 align="center">Square</h1
 
 <p align="center">
-  An unofficial Android music client for Spotify Premium and YouTube Music,
+  An unofficial Android music client for Spotify and YouTube Music,
   built in Liquid Glass.
 </p>
 
@@ -38,7 +38,7 @@
 - **Spotify or YouTube Music**, chosen at first launch and switchable in the
   settings. Home, search, the library and the player work the same on both.
 - **Spotify**: your own account, with its playlists, library and Connect
-  devices. Needs Premium.
+  devices. Free accounts work; Premium unlocks everything Spotify allows.
 - **YouTube Music**: the whole catalogue and the music videos, with no account
   needed. Sign in with Google to bring in your playlists, albums and followed
   artists.
@@ -141,9 +141,9 @@ the settings.
 
 - **YouTube Music** plays straight away. Signing in with Google, from the
   settings, is optional.
-- **Spotify** needs a Premium account and a few minutes of guided setup: you
-  sign in, then register a free app of your own in Spotify's developer
-  dashboard and paste its client ID. Search and a few other features go
+- **Spotify** needs an account and a few minutes of guided setup (a free one
+  works): you sign in, then register a free app of your own in Spotify's
+  developer dashboard and paste its client ID. Search and a few other features go
   through Spotify's Web API, which limits requests per app, so with your own
   app the limit is yours alone. The setup walks you through every step.
 
@@ -154,8 +154,10 @@ Android Auto only lists apps installed from the Play Store. Turn on "Unknown
 sources" in Android Auto's developer settings and Square shows up.
 
 **Can I use a free Spotify account?**
-No. A free account can sign in, but Spotify only streams to a client like this
-one with Premium. YouTube Music works with no account at all.
+Yes. Square no longer refuses a free account the way upstream librespot does;
+you can sign in and use the app. Premium is still the only way to get
+everything Spotify reserves for it, and YouTube Music works with no account at
+all.
 
 **YouTube Music search works, but songs do not play.**
 YouTube changes how its streams are served every so often. Update to the

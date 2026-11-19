@@ -1568,27 +1568,15 @@ class PlaybackService : MediaLibraryService() {
             engineStarted = false
             android.util.Log.e(TAG, "engine start failed: $error", error)
             // Not up at all, which on no data is ordinary: the keeper starts it
-            // again when there is a chance it works. A refused account below
-            // signs out, and the keeper then finds nothing wanted.
+            // again when there is a chance it works.
             dev.lelonio.square.playback.OfflineMode.setNoSession(true)
             SessionKeeper.sessionMissing()
-            // Only a refused account ends the session here. Everything else the
-            // handshake can fail with — no network, an access point that is
-            // busy, a dealer that dropped — is temporary, and signing the user
-            // out over it costs them their session for a failure that would
-            // have fixed itself on the next attempt. A refresh token Spotify
-            // really has revoked is cleared by TokenStore before it gets here.
-            if (error.message?.contains(PREMIUM_REQUIRED) == true) {
-                // Back to the login screen, with a reason. Staying signed in
-                // would leave an app that looks connected and plays nothing.
-                tokens.clear()
-                dev.lelonio.square.auth.EngineCredentials.clear(this@PlaybackService)
-                android.widget.Toast.makeText(
-                    this@PlaybackService,
-                    getString(dev.lelonio.square.R.string.premium_required),
-                    android.widget.Toast.LENGTH_LONG,
-                ).show()
-            }
+            // A failed handshake is no longer the end of the session either:
+            // free accounts are let through, so nothing here signs the user
+            // out. Signing out would cost them their session for a failure
+            // that fixes itself on the next attempt — no network, a busy
+            // access point, a dropped dealer. A refresh token Spotify really
+            // has revoked is cleared by TokenStore before it gets here.
         }.onSuccess {
             // Started is not the same as connected any more. With music on the
             // phone the engine comes up even when the handshake failed, with a
@@ -2161,9 +2149,6 @@ class PlaybackService : MediaLibraryService() {
 
         /** How often the position is written back while playing. */
         private const val SAVE_INTERVAL_MS = 10_000L
-
-        /** What the engine reports for an account it cannot stream to. */
-        private const val PREMIUM_REQUIRED = "premium account required"
 
         /** Tells the service a Spotify session now exists. */
         const val ACTION_CONNECT = "dev.lelonio.square.action.CONNECT"
